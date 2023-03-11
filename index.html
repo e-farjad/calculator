@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body>
+
+<div class="container">
+    <div class="input-box" id="input">
+    </div>
+    <div class="key-box">
+        <div class="key operator">(</div>
+        <div class="key operator">)</div>
+        <div class="key operator">Sin</div>
+        <div class="key operator">^</div>
+
+        <div class="key" >7</div>
+        <div class="key" >8</div>
+        <div class="key" >9</div>
+        <div class="key operator">×</div>
+
+        <div class="key" >4</div>
+        <div class="key" >5</div>
+        <div class="key" >6</div>
+        <div class="key operator">÷</div>
+
+        <div class="key" >1</div>
+        <div class="key" >2</div>
+        <div class="key" >3</div>
+        <div class="key operator">+</div>
+
+        <div class="key">.</div>
+        <div class="key">0</div>
+        <div class="key">=</div>
+        <div class="key operator">−</div>
+
+        <div class="key delete">AC</div>
+
+    </div>
+</div>
+    <script>
+        show();
+
+        // showing the content of key that is pressed
+        function show (){
+            let array=[];
+            let content="";
+            let lastItem=true; //if the last item is operator the value is true
+            for (let i=0;i<21;i++){
+                document.querySelectorAll(".key")[i].addEventListener("click",function (){
+                    if(this.classList[1]==="delete"){
+                        document.getElementById("input").innerHTML="";
+                        array=[];
+                    }
+                    else {
+                        content =this.innerHTML;
+                        document.getElementById("input").innerHTML+= content;
+                        if(content==="="){
+                            let result =getResult(array);
+                            document.getElementById("input").innerHTML= result.toString();
+                        }
+                        else if(this.classList[1]==="operator"){
+                            array.push(content);
+                            lastItem=true;
+                        }
+                        else {
+                            if (lastItem){
+                                array.push(content);
+                                lastItem=false;
+                            }
+                            else {
+                                array[array.length-1]+=content;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // get result of the array
+        function getResult(array){
+            let temp=array[0]; //temporary result
+            let index=0;
+            let tempArray=[];
+            if (array.includes(")")){
+                do {
+                    let find=false; //This becomes ture when the starting point is found
+                    index=array.indexOf(")")
+                    for (let i=index; find===false && i>=0 ;i--){ // finding the index of the starting point
+                        if(array[i]==="("){
+                            let startIndex=i;
+                            for (let j=0; i<index-1;j++){  //
+                                i++;
+                                tempArray[j]=array[i];
+                            }
+                            temp=getResult(tempArray);
+                            deleteAndReplace(startIndex,index,temp,array);
+                            find=true;
+                        }
+                    }
+                }while (array.includes(")"));
+            }
+            if(array.includes("Sin")){
+                do{
+                    index=array.indexOf("Sin");
+                    temp=calculation("Sin",array[index+1]);
+                    deleteAndReplace(index,index+1,temp,array);
+                }while(array.includes("Sin"));
+            }
+            if (array.includes("^")){
+                do {
+                    index=array.indexOf("^");
+                    temp=calculation("^",array[index-1],array[index+1]);
+                    deleteAndReplace(index-1,index+1,temp,array);
+                }while(array.includes("^"));
+            }
+            if ( array.includes("÷") || array.includes("×")){
+                while (array.includes("×")) {
+                    index=array.indexOf("×");
+                    temp=calculation("×",array[index-1],array[index+1]);
+                    deleteAndReplace(index-1,index+1,temp,array);
+                }
+                while (array.includes("÷")) {
+                    index=array.indexOf("÷");
+                    temp=calculation("÷",array[index-1],array[index+1]);
+                    deleteAndReplace(index-1,index+1,temp,array);
+                }
+            }
+            if ( array.includes("+") || array.includes("−")){
+                while (array.includes("+")) {
+                    index=array.indexOf("+");
+                    temp=calculation("+",array[index-1],array[index+1]);
+                    deleteAndReplace(index-1,index+1,temp,array);
+                }
+                while (array.includes("−")) {
+                    index=array.indexOf("−");
+                    temp=calculation("−",array[index-1],array[index+1]);
+                    deleteAndReplace(index-1,index+1,temp,array);
+                }
+            }
+            return temp;
+        }
+
+        // calculation of two number
+        function calculation (operator,num1,num2) {
+            num1=Number(num1);
+            num2=Number(num2);
+            let result = 0;
+            switch (operator) {
+                case "Sin":
+                    result=Math.sin(num1 * Math.PI/180);
+                    break;
+                case "÷":
+                    result= num1/num2;
+                    break;
+                case "^":
+                    result=Math.pow(num1, num2);
+                    break;
+                case "×":
+                    result=num1*num2;
+                    break;
+                case "+":
+                    result=num1+num2;
+                    break;
+                case "−":
+                    result=num1-num2;
+                    break;
+            }
+            return result;
+        }
+
+        //delete items from first-index to last-index and replace the item
+        function deleteAndReplace (first,last,item,array){
+            let a=(last-first)+1;
+            array.splice(first,a,item);
+            return array;
+        }
+
+    </script>
+</body>
+</html>
